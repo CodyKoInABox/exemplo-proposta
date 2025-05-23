@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Gerador de Proposta – Licitação</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body class="min-h-screen bg-gray-50 p-6 flex flex-col gap-6">
+  <h1 class="text-3xl font-bold text-center">Gerador de Proposta</h1>
+
+  <section class="flex flex-wrap items-end gap-2">
+    <div class="flex flex-col">
+      <label for="medInput" class="text-sm font-medium">Buscar medicamento</label>
+      <input id="medInput" list="medList" placeholder="Ex.: Paracetamol 500mg" class="border border-gray-300 rounded-lg p-2 w-64" />
+      <datalist id="medList"></datalist>
+    </div>
+    <button id="addBtn" class="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition">Adicionar</button>
+  </section>
+
+  <div class="overflow-x-auto">
+    <table id="proposalTable" class="min-w-full bg-white rounded-xl shadow-sm">
+      <thead class="bg-gray-100 text-xs uppercase text-gray-600">
+        <tr>
+          <th class="py-3 px-4 text-left">Nome do remédio</th>
+          <th class="py-3 px-4 text-center w-28">Quantidade</th>
+          <th class="py-3 px-4 text-center w-32">Preço unidade (R$)</th>
+          <th class="py-3 px-4 text-center w-32">Preço total (R$)</th>
+          <th class="py-3 px-4 w-12"></th>
+        </tr>
+      </thead>
+      <tbody class="text-sm divide-y divide-gray-200"></tbody>
+    </table>
+  </div>
+
+  <div class="flex gap-3">
+    <button id="generatePdf" class="bg-green-600 text-white py-2 px-6 rounded-lg hover:bg-green-700 transition">Gerar PDF</button>
+  </div>
+
+  <iframe id="pdfPreview" class="flex-1 w-full h-[500px] border rounded-lg bg-white shadow-inner"></iframe>
+
+  <script>
+    const medicines = [
+      "Paracetamol 500mg",
+      "Ibuprofeno 600mg",
+      "Amoxicilina 500mg",
+      "Dipirona 1g",
+      "Omeprazol 20mg"
+    ];
+
+    const medList = document.getElementById('medList');
+    medicines.forEach(med => {
+      const opt = document.createElement('option');
+      opt.value = med;
+      medList.appendChild(opt);
+    });
+
+    const medInput = document.getElementById('medInput');
+    const addBtn = document.getElementById('addBtn');
+    const tbody = document.querySelector('#proposalTable tbody');
+
+    addBtn.addEventListener('click', () => {
+      const name = medInput.value.trim();
+      if (!name) return;
+
+      const already = [...tbody.querySelectorAll('tr')].some(tr => tr.dataset.med === name);
+      if (already) {
+        alert('Esse medicamento já está na lista.');
+        return;
+      }
+
+      tbody.appendChild(createRow(name));
+      medInput.value = '';
+    });
+
+    function createRow(name) {
+      const tr = document.createElement('tr');
+      tr.dataset.med = name;
+      tr.innerHTML = `
+        <td class="py-2 px-4">${name}</td>
+        <td class="py-2 px-4 text-center"><input type="number" min="1" value="1" class="qty w-20 border rounded p-1 text-center" /></td>
+        <td class="py-2 px-4 text-center"><input type="number" min="0" step="0.01" value="0" class="unit w-24 border rounded p-1 text-center" /></td>
+        <td class="py-2 px-4 text-center"><input type="number" min="0" step="0.01" value="0" class="total w-24 border rounded p-1 text-center" /></td>
+        <td class="py-2 px-4 text-center"><button class="remove text-red-600 hover:text-red-800">&times;</button></td>
+      `;
+
+      const qty = tr.querySelector('.qty');
+      const unit = tr.querySelector('.unit');
+      const total = tr.querySelector('.total');
+
+      function recalcFromUnit() {
+        total.value = (qty.value * unit.value).toFixed(2);
+      }
+
+      function recalcFromTotal() {
+        if (qty.value > 0) unit.value = (total.value / qty.value).toFixed(2);
+      }
+
+      qty.addEventListener('input', recalcFromUnit);
+      unit.addEventListener('input', recalcFromUnit);
+      total.addEventListener('input', recalcFromTotal);
+
+      tr.querySelector('.remove').addEventListener('click', () => tr.remove());
+
+      return tr;
+    }
+
+    document.getElementById('generatePdf').addEventListener('click', async () => {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
+
+      const pageWidth = doc.internal.pageSize.getWidth();
+      doc.setFontSize(32);
+      doc.text('EMPRESA', pageWidth / 2, 60, { align: 'center' });
+
+      doc.setFontSize(12);
+      const startY = 110;
+      const rowHeight = 20;
+      const colX = [60, 300, 430, 560];
+
+      doc.text('nome do remédio', colX[0], startY);
+      doc.text('quantidade',       colX[1], startY);
+      doc.text('preço unidade',    colX[2], startY);
+      doc.text('preço total',      colX[3], startY);
+
+      let y = startY + rowHeight;
+      const lineStartX = 50;
+      const lineEndX = pageWidth - 50;
+
+      tbody.querySelectorAll('tr').forEach(tr => {
+        const tds = tr.querySelectorAll('td');
+        const qty = tr.querySelector('.qty').value;
+        const unit = tr.querySelector('.unit').value;
+        const total = tr.querySelector('.total').value;
+
+        doc.text(tds[0].textContent, colX[0], y);
+        doc.text(qty,                colX[1], y, { align: 'center' });
+        doc.text(unit,               colX[2], y, { align: 'center' });
+        doc.text(total,              colX[3], y, { align: 'center' });
+
+        doc.setDrawColor(200);
+        doc.line(lineStartX, y + 4, lineEndX, y + 4); // linha separadora
+        y += rowHeight;
+      });
+
+      const blob = doc.output('blob');
+      const url = URL.createObjectURL(blob);
+      document.getElementById('pdfPreview').src = url;
+    });
+  </script>
+</body>
+</html>
