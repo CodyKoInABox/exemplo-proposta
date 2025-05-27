@@ -41,11 +41,32 @@
 
   <script>
     const medicines = [
-      "Paracetamol 500mg",
-      "Ibuprofeno 600mg",
-      "Amoxicilina 500mg",
-      "Dipirona 1g",
-      "Omeprazol 20mg"
+      "BICALUTAMIDA 50 MG COM REV CT BL AL PLAS INC X 30",
+      "BUSSULFANO 50MG X 1ML",
+      "CITARABINA 100 MG/ML SOL INJ CT FA VD INC X 1 ML",
+      "CITARABINA 100 MG/ML SOL INJ CT FA VD INC X 10 ML",
+      "CITARABINA 100 MG/ML SOL INJ CT FA VD INC X 5 ML",
+      "DAPTOMICINA 350MG PO LIOFI SOL INJ/INFUS IV CT FA VD TRANS",
+      "DAPTOMICINA 500MG PO LIOFI SOL INJ/INFUS IV CT FA VD TRANS",
+      "PECTABINA 50 MG PO LIOFI SOL INJ/INFUS IV CT FA VD TRANS",
+      "DOXORRUBICINA 2MG/ML 25ML SOLUÇÃO INJETÁVEL",
+      "EVEROLIMO 0,75 MG X 60 CP",
+      "EVEROLIMO 1 MG X 60 CP",
+      "OSPEMIFANTO DIMEGLUMIN 156MG X 1 ML",
+      "FULVESTRANTO 250MG - 50MG/ML-2 SER VD TRANS PREENCHI DESI X SML + 2 AG",
+      "GENCITABINA CLORIDRATO 1000 MG X 50 ML",
+      "GENCITABINA CLORIDRATO 200 MG X 10 ML",
+      "HITAS 100 MG/ ML SOL INJ FA VD INC X 5 ML * Val. até 18 meses",
+      "MICAFUNGINA 50MG",
+      "MICAFUNGINA 100MG",
+      "MICOFENOLATO DE MOFETILA 500 MG X 50",
+      "MICOFENOLATO DE MOFETILA 500 MG X 500",
+      "MICOFENOLATO DE SÓDIO 360MG X 50 CP",
+      "PALINEXT (PALONOSETRON) 0,05 MG/ML X 5 ML",
+      "RELGRAZ (PEGFILGRASTIM) 10MG/NL X 0,6ML",
+      "TOPOTECANA CLORIDRATO 4 MG X 5 ML",
+      "VORICONAZOL 200 MG COM REV CT BL AL PLAS INC X 14",
+      "VORICONAZOL 50 MG COM REV CT BL AL PLAS INC X 14"
     ];
 
     const medList = document.getElementById('medList');
@@ -110,37 +131,158 @@
       const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
 
       const pageWidth = doc.internal.pageSize.getWidth();
-      doc.setFontSize(32);
-      doc.text('EMPRESA', pageWidth / 2, 60, { align: 'center' });
+      const pageHeight = doc.internal.pageSize.getHeight();
 
+      // Header - Orange background
+      doc.setFillColor(255, 165, 0); // Orange
+      doc.rect(40, 30, pageWidth - 80, 25, 'F');
+      
+      doc.setFontSize(16);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0, 0, 0);
+      doc.text('SOLICITAÇÃO DE CREDENCIAMENTO', pageWidth / 2, 48, { align: 'center' });
+
+      // Company address
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text('ENDEREÇO: AV. PAULISTA, 1578 - BELA VISTA - SÃO PAULO/SP', pageWidth / 2, 68, { align: 'center' });
+      doc.text('E-mail: email@emailprovider.com.br - A/C: Pessoa 01/01/2025', pageWidth / 2, 82, { align: 'center' });
+
+      // Dados do Solicitante - Yellow background
+      doc.setFillColor(255, 255, 0); // Yellow
+      doc.rect(40, 100, pageWidth - 80, 20, 'F');
+      
       doc.setFontSize(12);
-      const startY = 110;
-      const rowHeight = 20;
-      const colX = [60, 300, 430, 560];
+      doc.setFont('helvetica', 'bold');
+      doc.text('DADOS DO SOLICITANTE', pageWidth / 2, 115, { align: 'center' });
 
-      doc.text('nome do remédio', colX[0], startY);
-      doc.text('quantidade',       colX[1], startY);
-      doc.text('preço unidade',    colX[2], startY);
-      doc.text('preço total',      colX[3], startY);
+      // CNPJ and Name
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'normal');
+      doc.text('CNPJ:', 50, 140);
+      doc.setTextColor(255, 0, 0); // Red
+      doc.text('00.000.000/0000-00', 100, 140);
+      doc.setTextColor(0, 0, 0);
+      doc.text('NOME', 350, 140);
+      doc.text('COMERCIO DE MEDICAMENTOS LTDA', 420, 140);
 
-      let y = startY + rowHeight;
-      const lineStartX = 50;
-      const lineEndX = pageWidth - 50;
+      // Payment term
+      doc.text('PRAZO DE PAGAMENTO DO DISTRIBUIDOR:', 50, 160);
+      doc.setFillColor(255, 255, 0);
+      doc.rect(240, 150, 60, 15, 'F');
+      doc.text('30 DIAS', 270, 162, { align: 'center' });
 
+      // Dados do Edital - Dark background
+      doc.setFillColor(128, 128, 128); // Gray
+      doc.rect(40, 180, pageWidth - 80, 20, 'F');
+      
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(255, 255, 255); // White text
+      doc.text('DADOS DO EDITAL', pageWidth / 2, 195, { align: 'center' });
+
+      // Edital details
+      doc.setTextColor(0, 0, 0);
+      doc.setFontSize(9);
+      doc.setFont('helvetica', 'normal');
+      
+      let yPos = 220;
+      doc.text('CNPJ:', 50, yPos);
+      doc.text('ÓRGÃO LICITANTE:', 350, yPos);
+      
+      yPos += 15;
+      doc.text('CIDADE/UF:', 50, yPos);
+      doc.text('TIPO:', 550, yPos);
+      doc.text('Administrativo', 580, yPos);
+      
+      yPos += 15;
+      doc.text('MODALIDADE:', 50, yPos);
+      doc.text('PREGÃO ELETRÔNICO', 130, yPos);
+      doc.text('Nº', 350, yPos);
+      doc.text('Nº PROCESSO', 550, yPos);
+      
+      yPos += 15;
+      doc.text('DATA:', 50, yPos);
+      doc.text('HORA:', 350, yPos);
+      doc.text('VIGÊNCIA:', 550, yPos);
+      doc.text('Registro de 12 meses', 600, yPos);
+      
+      yPos += 15;
+      doc.text('VALIDADE DA PROPOSTA:', 50, yPos);
+      doc.text('60 dias', 170, yPos);
+      doc.text('COND. PAGTO:', 350, yPos);
+      doc.text('30 dias', 420, yPos);
+      doc.text('PRAZO DE ENTREGA:', 550, yPos);
+      doc.text('10 dias', 650, yPos);
+
+      // Produtos Solicitados header
+      yPos += 30;
+      doc.setFillColor(128, 128, 128);
+      doc.rect(40, yPos - 10, pageWidth - 80, 20, 'F');
+      
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(255, 255, 255);
+      doc.text('PRODUTOS SOLICITADOS', pageWidth / 2, yPos + 5, { align: 'center' });
+
+      // Table headers
+      yPos += 35;
+      doc.setFillColor(255, 165, 0); // Orange
+      doc.rect(40, yPos - 15, pageWidth - 80, 20, 'F');
+      
+      doc.setFontSize(10);
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(0, 0, 0);
+      
+      const colPositions = [50, 120, 400, 500, 570, 650, 710];
+      const headers = ['ITEM', 'CÓDIGO PRODUTO', 'PRODUTO SELECIONADO', 'TIPO', 'QT', 'UNIDADE LICITADA', 'VALOR'];
+      
+      headers.forEach((header, i) => {
+        doc.text(header, colPositions[i], yPos - 2);
+      });
+
+      // Table content
+      yPos += 10;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      
+      let itemNumber = 1;
       tbody.querySelectorAll('tr').forEach(tr => {
         const tds = tr.querySelectorAll('td');
         const qty = tr.querySelector('.qty').value;
         const unit = tr.querySelector('.unit').value;
         const total = tr.querySelector('.total').value;
+        const productName = tds[0].textContent;
 
-        doc.text(tds[0].textContent, colX[0], y);
-        doc.text(qty,                colX[1], y, { align: 'center' });
-        doc.text(unit,               colX[2], y, { align: 'center' });
-        doc.text(total,              colX[3], y, { align: 'center' });
+        // Alternate row colors
+        if (itemNumber % 2 === 0) {
+          doc.setFillColor(245, 245, 245);
+          doc.rect(40, yPos - 8, pageWidth - 80, 15, 'F');
+        }
 
-        doc.setDrawColor(200);
-        doc.line(lineStartX, y + 4, lineEndX, y + 4); // linha separadora
-        y += rowHeight;
+        doc.setTextColor(0, 0, 0);
+        doc.text(itemNumber.toString().padStart(3, '0') + '-03', colPositions[0], yPos);
+        doc.text('', colPositions[1], yPos); // Código produto - deixar em branco
+        
+        // Truncate long product names
+        const maxProductNameLength = 35;
+        const truncatedName = productName.length > maxProductNameLength ? 
+          productName.substring(0, maxProductNameLength) + '...' : productName;
+        doc.text(truncatedName, colPositions[2], yPos);
+        
+        doc.text('GENÉRICO', colPositions[3], yPos);
+        doc.text(qty, colPositions[4], yPos);
+        doc.text('FR/AMP', colPositions[5], yPos);
+        doc.text('R$ ' + parseFloat(total).toFixed(2), colPositions[6], yPos);
+
+        yPos += 15;
+        itemNumber++;
+        
+        // Check if we need a new page
+        if (yPos > pageHeight - 100) {
+          doc.addPage();
+          yPos = 50;
+        }
       });
 
       const blob = doc.output('blob');
