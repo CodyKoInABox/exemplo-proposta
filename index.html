@@ -161,7 +161,7 @@
       doc.setFont('helvetica', 'normal');
       doc.text('CNPJ:', 50, 140);
       doc.setTextColor(255, 0, 0); // Red
-      doc.text('00.000.000/0000-00', 100, 140);
+      doc.text('12.345.678/1234-56', 100, 140);
       doc.setTextColor(0, 0, 0);
       doc.text('NOME', 350, 140);
       doc.text('COMERCIO DE MEDICAMENTOS LTDA', 420, 140);
@@ -174,49 +174,64 @@
 
       // Dados do Edital - Dark background
       doc.setFillColor(128, 128, 128); // Gray
-      doc.rect(40, 180, pageWidth - 80, 20, 'F');
+      doc.rect(40, 165, pageWidth - 80, 20, 'F');
       
       doc.setFontSize(12);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(255, 255, 255); // White text
-      doc.text('DADOS DO EDITAL', pageWidth / 2, 195, { align: 'center' });
+      doc.text('DADOS DO EDITAL', pageWidth / 2, 178, { align: 'center' });
 
-      // Edital details
+      // Edital details with proper spacing and borders
       doc.setTextColor(0, 0, 0);
       doc.setFontSize(9);
       doc.setFont('helvetica', 'normal');
       
-      let yPos = 220;
+      // Create grid for edital details
+      const detailsStartY = 185;
+      const detailsHeight = 80;
+      doc.rect(40, detailsStartY, pageWidth - 80, detailsHeight);
+      
+      // Horizontal lines
+      doc.line(40, detailsStartY + 16, pageWidth - 40, detailsStartY + 16);
+      doc.line(40, detailsStartY + 32, pageWidth - 40, detailsStartY + 32);
+      doc.line(40, detailsStartY + 48, pageWidth - 40, detailsStartY + 48);
+      doc.line(40, detailsStartY + 64, pageWidth - 40, detailsStartY + 64);
+      
+      // Vertical lines
+      doc.line(300, detailsStartY, 300, detailsStartY + detailsHeight);
+      doc.line(500, detailsStartY, 500, detailsStartY + detailsHeight);
+      
+      let yPos = detailsStartY + 12;
       doc.text('CNPJ:', 50, yPos);
-      doc.text('ÓRGÃO LICITANTE:', 350, yPos);
+      doc.text('ÓRGÃO LICITANTE:', 310, yPos);
       
-      yPos += 15;
+      yPos += 16;
       doc.text('CIDADE/UF:', 50, yPos);
-      doc.text('TIPO:', 550, yPos);
-      doc.text('Administrativo', 580, yPos);
+      doc.text('TIPO:', 510, yPos);
+      doc.text('Administrativo', 540, yPos);
       
-      yPos += 15;
+      yPos += 16;
       doc.text('MODALIDADE:', 50, yPos);
       doc.text('PREGÃO ELETRÔNICO', 130, yPos);
-      doc.text('Nº', 350, yPos);
-      doc.text('Nº PROCESSO', 550, yPos);
+      doc.text('Nº', 310, yPos);
+      doc.text('Nº PROCESSO', 510, yPos);
       
-      yPos += 15;
+      yPos += 16;
       doc.text('DATA:', 50, yPos);
-      doc.text('HORA:', 350, yPos);
-      doc.text('VIGÊNCIA:', 550, yPos);
-      doc.text('Registro de 12 meses', 600, yPos);
+      doc.text('HORA:', 310, yPos);
+      doc.text('VIGÊNCIA:', 510, yPos);
+      doc.text('Registro de 12 meses', 570, yPos);
       
-      yPos += 15;
+      yPos += 16;
       doc.text('VALIDADE DA PROPOSTA:', 50, yPos);
       doc.text('60 dias', 170, yPos);
-      doc.text('COND. PAGTO:', 350, yPos);
-      doc.text('30 dias', 420, yPos);
-      doc.text('PRAZO DE ENTREGA:', 550, yPos);
-      doc.text('10 dias', 650, yPos);
+      doc.text('COND. PAGTO:', 310, yPos);
+      doc.text('30 dias', 370, yPos);
+      doc.text('PRAZO DE ENTREGA:', 510, yPos);
+      doc.text('10 dias', 600, yPos);
 
       // Produtos Solicitados header
-      yPos += 30;
+      yPos = 285;
       doc.setFillColor(128, 128, 128);
       doc.rect(40, yPos - 10, pageWidth - 80, 20, 'F');
       
@@ -230,19 +245,58 @@
       doc.setFillColor(255, 165, 0); // Orange
       doc.rect(40, yPos - 15, pageWidth - 80, 20, 'F');
       
-      doc.setFontSize(10);
+      doc.setFontSize(9);
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(0, 0, 0);
       
-      const colPositions = [50, 120, 400, 500, 570, 650, 710];
-      const headers = ['ITEM', 'CÓDIGO PRODUTO', 'PRODUTO SELECIONADO', 'TIPO', 'QT', 'UNIDADE LICITADA', 'VALOR'];
+      const colPositions = [50, 100, 250, 450, 520, 580, 650];
+      const colWidths = [50, 150, 200, 70, 60, 70, 90];
+      const headers = ['ITEM', 'CÓDIGO\nPRODUTO', 'PRODUTO SELECIONADO', 'TIPO', 'QT', 'UNIDADE\nLICITADA', 'VALOR'];
+      
+      // Draw vertical lines for table headers
+      let xPos = 40;
+      for (let i = 0; i <= colWidths.length; i++) {
+        doc.line(xPos, yPos - 15, xPos, yPos + 5);
+        if (i < colWidths.length) xPos += colWidths[i];
+      }
       
       headers.forEach((header, i) => {
-        doc.text(header, colPositions[i], yPos - 2);
+        const lines = header.split('\n');
+        if (lines.length > 1) {
+          doc.text(lines[0], colPositions[i], yPos - 8);
+          doc.text(lines[1], colPositions[i], yPos + 2);
+        } else {
+          doc.text(header, colPositions[i], yPos - 3);
+        }
       });
 
+      // Function to wrap text
+      function wrapText(text, maxWidth) {
+        const words = text.split(' ');
+        const lines = [];
+        let currentLine = '';
+        
+        for (let word of words) {
+          const testLine = currentLine + (currentLine ? ' ' : '') + word;
+          const testWidth = doc.getTextWidth(testLine);
+          
+          if (testWidth > maxWidth && currentLine) {
+            lines.push(currentLine);
+            currentLine = word;
+          } else {
+            currentLine = testLine;
+          }
+        }
+        
+        if (currentLine) {
+          lines.push(currentLine);
+        }
+        
+        return lines;
+      }
+
       // Table content
-      yPos += 10;
+      yPos += 15;
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
       
@@ -254,28 +308,42 @@
         const total = tr.querySelector('.total').value;
         const productName = tds[0].textContent;
 
+        // Calculate row height based on wrapped text
+        const wrappedProduct = wrapText(productName, 180);
+        const rowHeight = Math.max(15, wrappedProduct.length * 10 + 5);
+
         // Alternate row colors
         if (itemNumber % 2 === 0) {
           doc.setFillColor(245, 245, 245);
-          doc.rect(40, yPos - 8, pageWidth - 80, 15, 'F');
+          doc.rect(40, yPos - 8, pageWidth - 80, rowHeight, 'F');
         }
+
+        // Draw cell borders
+        let xPos = 40;
+        for (let i = 0; i <= colWidths.length; i++) {
+          doc.setDrawColor(200, 200, 200);
+          doc.line(xPos, yPos - 8, xPos, yPos + rowHeight - 8);
+          if (i < colWidths.length) xPos += colWidths[i];
+        }
+        
+        // Bottom border
+        doc.line(40, yPos + rowHeight - 8, pageWidth - 40, yPos + rowHeight - 8);
 
         doc.setTextColor(0, 0, 0);
         doc.text(itemNumber.toString().padStart(3, '0') + '-03', colPositions[0], yPos);
         doc.text('', colPositions[1], yPos); // Código produto - deixar em branco
         
-        // Truncate long product names
-        const maxProductNameLength = 35;
-        const truncatedName = productName.length > maxProductNameLength ? 
-          productName.substring(0, maxProductNameLength) + '...' : productName;
-        doc.text(truncatedName, colPositions[2], yPos);
+        // Multi-line product name
+        wrappedProduct.forEach((line, index) => {
+          doc.text(line, colPositions[2], yPos + (index * 10));
+        });
         
         doc.text('GENÉRICO', colPositions[3], yPos);
         doc.text(qty, colPositions[4], yPos);
         doc.text('FR/AMP', colPositions[5], yPos);
         doc.text('R$ ' + parseFloat(total).toFixed(2), colPositions[6], yPos);
 
-        yPos += 15;
+        yPos += rowHeight;
         itemNumber++;
         
         // Check if we need a new page
