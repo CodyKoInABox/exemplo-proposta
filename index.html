@@ -142,11 +142,15 @@
       doc.setTextColor(0, 0, 0);
       doc.text('SOLICITAÇÃO DE CREDENCIAMENTO', pageWidth / 2, 48, { align: 'center' });
 
+      // Get today's date in DD/MM/YYYY format
+      const today = new Date();
+      const formattedDate = today.toLocaleDateString('pt-BR'); // e.g., "27/05/2025"
+
       // Company address
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       doc.text('ENDEREÇO: AV. PAULISTA, 1578 - BELA VISTA - SÃO PAULO/SP', pageWidth / 2, 68, { align: 'center' });
-      doc.text('E-mail: email@emailprovider.com.br - A/C: Pessoa 01/01/2025', pageWidth / 2, 82, { align: 'center' });
+      doc.text(`E-mail: email@emailprovider.com.br - A/C: Pessoa ${formattedDate}`, pageWidth / 2, 82, { align: 'center' });
 
       // Dados do Solicitante - Yellow background
       doc.setFillColor(255, 255, 0); // Yellow
